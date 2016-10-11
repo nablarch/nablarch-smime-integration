@@ -1,0 +1,9 @@
+<FindBugsFilter>
+  <!-- mutable object の参照受け、参照渡しチェックを除外対象 -->
+  <Match>
+    <Class name="please.change.me.common.mail.smime.CertificateWrapper" />
+    <Method name="getCertificates" />
+    <Bug pattern="EI_EXPOSE_REP" />
+  </Match>
+</FindBugsFilter>
+

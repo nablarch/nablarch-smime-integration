@@ -1,0 +1,93 @@
+// -*- mode: groovy; coding: utf-8-unix -*-
+
+
+group = 'com.nablarch.integration'
+version = '1.0.0'
+description = 'bouncycastleによる電子署名付きメール送信機能の実装'
+
+buildscript {
+  repositories {
+    mavenLocal()
+    maven { url "${developLibUrl}" }
+    jcenter()
+  }
+  dependencies {
+    classpath "com.nablarch.dev:nablarch-gradle-plugin:${nablarchGradlePluginVersion}"
+    classpath "net.saliman:gradle-cobertura-plugin:2.2.3"
+    classpath "io.spring.gradle:dependency-management-plugin:0.5.3.RELEASE"
+  }
+}
+apply {
+  plugin 'com.nablarch.dev.nablarch-build'
+  plugin 'com.nablarch.dev.nablarch-sonarqube'
+  plugin 'com.nablarch.dev.nablarch-maven-deploy'
+  from 'https://github.com/nablarch/nablarch-gradle-plugin/blob/develop/scripts/cobertura/cobertura-0.0.1.gradle?raw=true'
+}
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+  imports {
+    mavenBom 'com.nablarch.profile:nablarch-bom:5u6'
+  }
+  applyMavenExclusions false
+}
+
+sourceSets {
+  main {
+    java {
+      srcDir "${projectDir}/main/java"
+    }
+  }
+  test {
+    java {
+      srcDir "${projectDir}/test/java"
+    }
+    resources {
+      srcDir "${projectDir}/test/resources"
+    }
+  }
+}
+
+repositories {
+  mavenLocal()
+  maven { url "${developLibUrl}" }
+  jcenter()
+
+  // サードパーティ製ライブラリの格納リポジトリ
+  if(project.hasProperty('nablarchExtRepoUrl')) {
+      maven { url "${nablarchExtRepoUrl}" }
+  }
+}
+
+dependencies {
+
+  compile(
+    'com.nablarch.framework:nablarch-mail-sender',
+    'org.bouncycastle:bcmail-jdk15on:1.47',
+    'javax.mail:mailapi:1.4.3',
+  )
+
+  testCompile 'com.nablarch.framework:nablarch-testing'
+  testCompile 'junit:junit:4.10'
+  testCompile 'org.hamcrest:hamcrest-all:1.3'
+
+  testRuntime 'com.nablarch.framework:nablarch-common-idgenerator-jdbc'
+  testRuntime 'com.nablarch.framework:nablarch-common-jdbc'
+
+  // JDBC Drivers
+  testCompile (group: 'com.oracle', name: 'ojdbc6', version: '11.2.0.4.0')
+  testRuntime (group: 'com.oracle', name: 'ucp', version: '11.2.0.3.0')
+
+  // mail
+  testRuntime 'com.sun.mail:pop3:1.4.4'
+  testRuntime 'com.sun.mail:smtp:1.4.4'
+
+}
+
+test {
+  ignoreFailures = true
+}
+
+wrapper {
+  gradleVersion = '2.4'
+}
