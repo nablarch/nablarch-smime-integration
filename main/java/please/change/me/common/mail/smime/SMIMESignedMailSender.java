@@ -17,12 +17,11 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 import nablarch.common.mail.MailAttachedFileTable;
-import nablarch.common.mail.MailConfig;
 import nablarch.common.mail.MailRequestTable;
 import nablarch.common.mail.MailSender;
+import nablarch.common.mail.SendMailException;
 import nablarch.core.repository.SystemRepository;
 import nablarch.fw.ExecutionContext;
-import nablarch.fw.results.TransactionAbnormalEnd;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -97,12 +96,10 @@ public class SMIMESignedMailSender extends MailSender {
                 mimeMessage.setContent(smimeSignedGenerator.generate(smimeBody));
             }
         } catch (Exception e) {
-            MailConfig mailConfig = SystemRepository.get("mailConfig");
-            String mailRequestId = mailRequest.getMailRequestId();
-
-            throw new TransactionAbnormalEnd(
-                    mailConfig.getAbnormalEndExitCode(), e,
-                    mailConfig.getSendFailureCode(), mailRequestId);
+            throw new SendMailException(
+                    String.format("Failed to add contents in the mail. mailRequestId=[%s]",
+                            mailRequest.getMailRequestId()),
+                    e);
         }
     }
 

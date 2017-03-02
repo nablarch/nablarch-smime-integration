@@ -27,7 +27,7 @@ apply plugin: "io.spring.dependency-management"
 
 dependencyManagement {
   imports {
-    mavenBom 'com.nablarch.profile:nablarch-bom:5u8'
+    mavenBom 'com.nablarch.profile:nablarch-bom:5u9'
   }
   applyMavenExclusions false
 }
@@ -68,8 +68,8 @@ dependencies {
   )
 
   testCompile 'com.nablarch.framework:nablarch-testing'
-  testCompile 'junit:junit:4.10'
   testCompile 'org.hamcrest:hamcrest-all:1.3'
+  testCompile 'junit:junit:4.10'
 
   testRuntime 'com.nablarch.framework:nablarch-common-idgenerator-jdbc'
   testRuntime 'com.nablarch.framework:nablarch-common-jdbc'

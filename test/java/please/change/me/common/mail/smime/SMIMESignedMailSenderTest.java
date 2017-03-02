@@ -455,7 +455,7 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
                 "-mailSendPatternId", "02");
         int exitCode = Main.execute(commandLine);
 
-        assertThat(exitCode, is(199));
+        assertThat("送信失敗でもバッチは正常終了。",exitCode, is(0));
 
         // ログアサート
         assertLog("メール送信要求が 1 件あります。");
