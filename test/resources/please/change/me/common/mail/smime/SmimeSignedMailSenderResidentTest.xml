@@ -41,6 +41,21 @@
     <component class="please.change.me.common.mail.testsupport.MailExceptionHandler" />
     <!-- スレッドコンテキスト設定ハンドラ -->
     <component-ref name="threadContextHandler" />
+    <!-- リトライハンドラ -->
+    <component name="retryHandler" class="nablarch.fw.handler.RetryHandler">
+      <property name="retryLimitExceededFailureCode" value="" />
+      <property name="retryContextFactory">
+        <component class="nablarch.fw.handler.retry.CountingRetryContextFactory">
+          <property name="retryCount" value="3" />          <!-- 3回リトライを行う -->
+          <property name="retryIntervals" value="500" />   <!-- リトライを実行するまで0.5秒待機する -->
+        </component>
+      </property>
+    </component>
+    <!-- 常駐化ハンドラ (Retryも含めてテストする) -->
+    <component name="processResidentHandler"
+        class="nablarch.fw.handler.ProcessResidentHandler">
+      <property name="dataWatchInterval" value="1000" />
+    </component>
     <!-- データベース接続ハンドラ -->
     <component-ref name="dbConnectionManagementHandler" />
     <!--トランザクションマネージャ -->

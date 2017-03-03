@@ -16,13 +16,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
-import nablarch.common.mail.MailAttachedFileTable;
-import nablarch.common.mail.MailRequestTable;
-import nablarch.common.mail.MailSender;
-import nablarch.common.mail.SendMailException;
-import nablarch.core.repository.SystemRepository;
-import nablarch.fw.ExecutionContext;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -33,10 +26,17 @@ import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
+
+import nablarch.common.mail.MailAttachedFileTable;
+import nablarch.common.mail.MailRequestTable;
+import nablarch.common.mail.MailSender;
+import nablarch.core.repository.SystemRepository;
+import nablarch.fw.ExecutionContext;
 
 /**
  * 電子署名付きメール送信を行うバッチアクション。
@@ -69,6 +69,7 @@ public class SMIMESignedMailSender extends MailSender {
         Map<String, CertificateWrapper> certificateChain = SystemRepository.get(CERTIFICATE_REPOSITORY_KEY);
         CertificateWrapper certificateWrapper = certificateChain.get(mailSendPatternId);
 
+        //try {
         try {
             // 電子署名を生成するジェネレータ
             SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();
@@ -95,12 +96,23 @@ public class SMIMESignedMailSender extends MailSender {
                 smimeBody.setContent(multiPart);
                 mimeMessage.setContent(smimeSignedGenerator.generate(smimeBody));
             }
-        } catch (Exception e) {
-            throw new SendMailException(
-                    String.format("Failed to add contents in the mail. mailRequestId=[%s]",
+        } catch (OperatorCreationException e) {
+            throw createCertificationException(e, mailRequest);
+        } catch (CertificateEncodingException e) {
+            throw createCertificationException(e, mailRequest);
+        } catch (CertificateParsingException e) {
+            throw createCertificationException(e, mailRequest);
+        } catch (SMIMEException e) {
+            throw createCertificationException(e, mailRequest);
+        }
+    }
+
+    private RuntimeException createCertificationException(Exception e, MailRequestTable.MailRequest mailRequest)
+    {
+            return new RuntimeException(
+                    String.format("Failed to create certification. mailRequestId=[%s]",
                             mailRequest.getMailRequestId()),
                     e);
-        }
     }
 
     /**
