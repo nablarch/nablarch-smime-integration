@@ -516,11 +516,12 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
                 "-mailSendPatternId", "05");
         int exitCode = Main.execute(commandLine);
 
-        assertThat("リトライし上限に達して異常終了する。", exitCode, is(180));
+        assertThat("設定不備なので1通目でプロセスは異常終了する。", exitCode, is(199));
 
         // ログアサート
         assertLog("メール送信要求が 2 件あります。");
-        assertLog("[180 ProcessAbnormalEnd] An error happened");
+        assertLog("No certification setting. mailSendPatternId=[05]");
+        assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 101");
 
         PreparedStatement statement = testDbConnection.prepareStatement(
                 "select * from mail_send_request order by mail_request_id");
@@ -531,7 +532,7 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
         assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
         assertThat(rs.next(), is(true));
         assertThat(rs.getString("mail_request_id"), is("102"));
-        assertThat(rs.getString("status"), is("Z"));
+        assertThat(rs.getString("status"), is("A"));
         assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
     }
 }

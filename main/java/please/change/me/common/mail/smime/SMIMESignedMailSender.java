@@ -72,6 +72,11 @@ public class SMIMESignedMailSender extends MailSender {
         CertificateWrapper certificateWrapper = certificateChain.get(mailSendPatternId);
 
         try {
+            if (certificateWrapper == null) {
+                throw new IllegalStateException(
+                        String.format("No certification setting. mailSendPatternId=[%s]", mailSendPatternId));
+            }
+
             // 電子署名を生成するジェネレータ
             SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();
 
@@ -104,6 +109,8 @@ public class SMIMESignedMailSender extends MailSender {
         } catch (CertificateParsingException e) {
             throw createProcessAbnormalEnd(e, mailRequest);
         } catch (SMIMEException e) {
+            throw createProcessAbnormalEnd(e, mailRequest);
+        } catch (IllegalStateException e) {
             throw createProcessAbnormalEnd(e, mailRequest);
         }
     }
