@@ -458,7 +458,6 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
 
         // ログアサート
         assertLog("メール送信要求が 1 件あります。");
-        assertLog("Failed to create certification. mailRequestId=[103]");
         assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 103");
 
         PreparedStatement statement = testDbConnection.prepareStatement(
@@ -489,16 +488,26 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
     @Test
     public void testNoCertificatePatternId() throws Exception {
 
-        FreeTextMailContext mailContext = new FreeTextMailContext();
-        mailContext.setSubject("けんめい");
-        mailContext.setMailBody("本文");
-        mailContext.setCharset("utf-8");
-        mailContext.setFrom("from@from.com");
-        mailContext.addTo("to1@localhost");
-        mailContext.addCc("cc1@localhost");
-        mailContext.addBcc("bcc1@localhost");
-        mailContext.setMailSendPatternId("05");// CertificateWrapperが存在しないID
-        mailRequest(mailContext);
+        FreeTextMailContext mailContext1 = new FreeTextMailContext();
+        mailContext1.setSubject("けんめい");
+        mailContext1.setMailBody("本文");
+        mailContext1.setCharset("utf-8");
+        mailContext1.setFrom("from@from.com");
+        mailContext1.addTo("to1@localhost");
+        mailContext1.addCc("cc1@localhost");
+        mailContext1.addBcc("bcc1@localhost");
+        mailContext1.setMailSendPatternId("05");// CertificateWrapperが存在しないID
+        mailRequest(mailContext1);
+        FreeTextMailContext mailContext2 = new FreeTextMailContext();
+        mailContext2.setSubject("けんめい2");
+        mailContext2.setMailBody("本文2");
+        mailContext2.setCharset("utf-8");
+        mailContext2.setFrom("from@from.com");
+        mailContext2.addTo("to1@localhost");
+        mailContext2.addCc("cc1@localhost");
+        mailContext2.addBcc("bcc1@localhost");
+        mailContext2.setMailSendPatternId("05");// CertificateWrapperが存在しないID
+        mailRequest(mailContext2);
 
         // バッチ実行
         CommandLine commandLine = new CommandLine("-diConfig",
@@ -507,17 +516,21 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
                 "-mailSendPatternId", "05");
         int exitCode = Main.execute(commandLine);
 
-        assertThat("予期せぬ例外なので、プロセスは異常終了する。",exitCode, is(199));
+        assertThat("リトライし上限に達して異常終了する。", exitCode, is(180));
 
         // ログアサート
-        assertLog("メール送信要求が 1 件あります。");
-        assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 101");
+        assertLog("メール送信要求が 2 件あります。");
+        assertLog("[180 ProcessAbnormalEnd] An error happened");
 
         PreparedStatement statement = testDbConnection.prepareStatement(
                 "select * from mail_send_request order by mail_request_id");
         ResultSet rs = statement.executeQuery();
         assertThat(rs.next(), is(true));
         assertThat(rs.getString("mail_request_id"), is("101"));
+        assertThat(rs.getString("status"), is("Z"));
+        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+        assertThat(rs.next(), is(true));
+        assertThat(rs.getString("mail_request_id"), is("102"));
         assertThat(rs.getString("status"), is("Z"));
         assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
     }

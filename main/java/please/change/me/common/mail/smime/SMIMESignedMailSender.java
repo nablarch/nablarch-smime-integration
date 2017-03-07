@@ -33,10 +33,12 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
 
 import nablarch.common.mail.MailAttachedFileTable;
+import nablarch.common.mail.MailConfig;
 import nablarch.common.mail.MailRequestTable;
 import nablarch.common.mail.MailSender;
 import nablarch.core.repository.SystemRepository;
 import nablarch.fw.ExecutionContext;
+import nablarch.fw.launcher.ProcessAbnormalEnd;
 
 /**
  * 電子署名付きメール送信を行うバッチアクション。
@@ -69,7 +71,6 @@ public class SMIMESignedMailSender extends MailSender {
         Map<String, CertificateWrapper> certificateChain = SystemRepository.get(CERTIFICATE_REPOSITORY_KEY);
         CertificateWrapper certificateWrapper = certificateChain.get(mailSendPatternId);
 
-        //try {
         try {
             // 電子署名を生成するジェネレータ
             SMIMESignedGenerator smimeSignedGenerator = new SMIMESignedGenerator();
@@ -97,22 +98,28 @@ public class SMIMESignedMailSender extends MailSender {
                 mimeMessage.setContent(smimeSignedGenerator.generate(smimeBody));
             }
         } catch (OperatorCreationException e) {
-            throw createCertificationException(e, mailRequest);
+            throw createProcessAbnormalEnd(e, mailRequest);
         } catch (CertificateEncodingException e) {
-            throw createCertificationException(e, mailRequest);
+            throw createProcessAbnormalEnd(e, mailRequest);
         } catch (CertificateParsingException e) {
-            throw createCertificationException(e, mailRequest);
+            throw createProcessAbnormalEnd(e, mailRequest);
         } catch (SMIMEException e) {
-            throw createCertificationException(e, mailRequest);
+            throw createProcessAbnormalEnd(e, mailRequest);
         }
     }
 
-    private RuntimeException createCertificationException(Exception e, MailRequestTable.MailRequest mailRequest)
-    {
-            return new RuntimeException(
-                    String.format("Failed to create certification. mailRequestId=[%s]",
-                            mailRequest.getMailRequestId()),
-                    e);
+    /**
+     * 電子署名の設定失敗時のプロセス異常終了例外を生成する。
+     *
+     * @param e 元となる例外
+     * @param mailRequest メール送信要求
+     * @return {@link ProcessAbnormalEnd}
+     */
+    private ProcessAbnormalEnd createProcessAbnormalEnd(Exception e, MailRequestTable.MailRequest mailRequest) {
+        MailConfig mailConfig = SystemRepository.get("mailConfig");
+        return new ProcessAbnormalEnd(
+                mailConfig.getAbnormalEndExitCode(), e,
+                mailConfig.getSendFailureCode(), mailRequest.getMailRequestId());
     }
 
     /**
