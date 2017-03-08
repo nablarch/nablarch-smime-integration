@@ -1,5 +1,11 @@
 package please.change.me.common.mail.smime;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.io.File;
 import java.sql.PreparedStatement;
@@ -23,12 +29,6 @@ import nablarch.common.mail.FreeTextMailContext;
 import nablarch.fw.launcher.CommandLine;
 import nablarch.fw.launcher.Main;
 import please.change.me.common.mail.testsupport.MailTestSupport;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 
 /**
  * {@link SMIMESignedMailSender}のテスト。
@@ -454,11 +454,11 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
                 "please.change.me.common.mail.smime.SMIMESignedMailSender/SENDMAIL00", "-userId", "userid",
                 "-mailSendPatternId", "02");
         int exitCode = Main.execute(commandLine);
-
-        assertThat(exitCode, is(199));
+        assertThat("電子署名に失敗なので異常終了。",exitCode, is(199));
 
         // ログアサート
         assertLog("メール送信要求が 1 件あります。");
+        assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 103");
 
         PreparedStatement statement = testDbConnection.prepareStatement(
                 "select * from mail_send_request order by mail_request_id");
@@ -480,5 +480,60 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
 
     }
 
+    /**
+     * 添付ファイルのcontentTypeを空文字列にした場合。
+     *
+     * 電子署名生成でエラーになること。
+     */
+    @Test
+    public void testNoCertificatePatternId() throws Exception {
+
+        FreeTextMailContext mailContext1 = new FreeTextMailContext();
+        mailContext1.setSubject("けんめい");
+        mailContext1.setMailBody("本文");
+        mailContext1.setCharset("utf-8");
+        mailContext1.setFrom("from@from.com");
+        mailContext1.addTo("to1@localhost");
+        mailContext1.addCc("cc1@localhost");
+        mailContext1.addBcc("bcc1@localhost");
+        mailContext1.setMailSendPatternId("05");// CertificateWrapperが存在しないID
+        mailRequest(mailContext1);
+        FreeTextMailContext mailContext2 = new FreeTextMailContext();
+        mailContext2.setSubject("けんめい2");
+        mailContext2.setMailBody("本文2");
+        mailContext2.setCharset("utf-8");
+        mailContext2.setFrom("from@from.com");
+        mailContext2.addTo("to1@localhost");
+        mailContext2.addCc("cc1@localhost");
+        mailContext2.addBcc("bcc1@localhost");
+        mailContext2.setMailSendPatternId("05");// CertificateWrapperが存在しないID
+        mailRequest(mailContext2);
+
+        // バッチ実行
+        CommandLine commandLine = new CommandLine("-diConfig",
+                "please/change/me/common/mail/smime/SmimeSignedMailSenderResidentTest.xml", "-requestPath",
+                "please.change.me.common.mail.smime.SMIMESignedMailSender/SENDMAIL00", "-userId", "userid",
+                "-mailSendPatternId", "05");
+        int exitCode = Main.execute(commandLine);
+
+        assertThat("設定不備なので1通目でプロセスは異常終了する。", exitCode, is(199));
+
+        // ログアサート
+        assertLog("メール送信要求が 2 件あります。");
+        assertLog("No certification setting. mailSendPatternId=[05]");
+        assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 101");
+
+        PreparedStatement statement = testDbConnection.prepareStatement(
+                "select * from mail_send_request order by mail_request_id");
+        ResultSet rs = statement.executeQuery();
+        assertThat(rs.next(), is(true));
+        assertThat(rs.getString("mail_request_id"), is("101"));
+        assertThat(rs.getString("status"), is("Z"));
+        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+        assertThat(rs.next(), is(true));
+        assertThat(rs.getString("mail_request_id"), is("102"));
+        assertThat(rs.getString("status"), is("A"));
+        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+    }
 }
 

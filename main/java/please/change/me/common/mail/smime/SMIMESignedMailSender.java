@@ -16,14 +16,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
-import nablarch.common.mail.MailAttachedFileTable;
-import nablarch.common.mail.MailConfig;
-import nablarch.common.mail.MailRequestTable;
-import nablarch.common.mail.MailSender;
-import nablarch.core.repository.SystemRepository;
-import nablarch.fw.ExecutionContext;
-import nablarch.fw.results.TransactionAbnormalEnd;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -34,10 +26,19 @@ import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
+
+import nablarch.common.mail.MailAttachedFileTable;
+import nablarch.common.mail.MailConfig;
+import nablarch.common.mail.MailRequestTable;
+import nablarch.common.mail.MailSender;
+import nablarch.core.repository.SystemRepository;
+import nablarch.fw.ExecutionContext;
+import nablarch.fw.launcher.ProcessAbnormalEnd;
 
 /**
  * 電子署名付きメール送信を行うバッチアクション。
@@ -69,6 +70,12 @@ public class SMIMESignedMailSender extends MailSender {
         String mailSendPatternId = context.getSessionScopedVar("mailSendPatternId");
         Map<String, CertificateWrapper> certificateChain = SystemRepository.get(CERTIFICATE_REPOSITORY_KEY);
         CertificateWrapper certificateWrapper = certificateChain.get(mailSendPatternId);
+        if (certificateWrapper == null) {
+            throw createProcessAbnormalEnd(
+                    new IllegalStateException(
+                            String.format("No certification setting. mailSendPatternId=[%s]", mailSendPatternId)),
+                    mailRequest);
+        }
 
         try {
             // 電子署名を生成するジェネレータ
@@ -96,14 +103,29 @@ public class SMIMESignedMailSender extends MailSender {
                 smimeBody.setContent(multiPart);
                 mimeMessage.setContent(smimeSignedGenerator.generate(smimeBody));
             }
-        } catch (Exception e) {
-            MailConfig mailConfig = SystemRepository.get("mailConfig");
-            String mailRequestId = mailRequest.getMailRequestId();
-
-            throw new TransactionAbnormalEnd(
-                    mailConfig.getAbnormalEndExitCode(), e,
-                    mailConfig.getSendFailureCode(), mailRequestId);
+        } catch (OperatorCreationException e) {
+            throw createProcessAbnormalEnd(e, mailRequest);
+        } catch (CertificateEncodingException e) {
+            throw createProcessAbnormalEnd(e, mailRequest);
+        } catch (CertificateParsingException e) {
+            throw createProcessAbnormalEnd(e, mailRequest);
+        } catch (SMIMEException e) {
+            throw createProcessAbnormalEnd(e, mailRequest);
         }
+    }
+
+    /**
+     * 電子署名の設定失敗時のプロセス異常終了例外を生成する。
+     *
+     * @param e 元となる例外
+     * @param mailRequest メール送信要求
+     * @return {@link ProcessAbnormalEnd}
+     */
+    private ProcessAbnormalEnd createProcessAbnormalEnd(Exception e, MailRequestTable.MailRequest mailRequest) {
+        MailConfig mailConfig = SystemRepository.get("mailConfig");
+        return new ProcessAbnormalEnd(
+                mailConfig.getAbnormalEndExitCode(), e,
+                mailConfig.getSendFailureCode(), mailRequest.getMailRequestId());
     }
 
     /**
