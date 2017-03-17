@@ -8,9 +8,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.io.File;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.util.List;
 import java.util.Properties;
+
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -21,14 +21,18 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
-import org.junit.Before;
-import org.junit.Test;
+
+import please.change.me.common.mail.testsupport.MailTestSupport;
+import please.change.me.common.mail.testsupport.entity.MailSendRequest;
 
 import nablarch.common.mail.AttachedFile;
 import nablarch.common.mail.FreeTextMailContext;
 import nablarch.fw.launcher.CommandLine;
 import nablarch.fw.launcher.Main;
-import please.change.me.common.mail.testsupport.MailTestSupport;
+import nablarch.test.support.db.helper.VariousDbTestHelper;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * {@link SMIMESignedMailSender}のテスト。
@@ -183,21 +187,11 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
 
         }
 
-        PreparedStatement statement = testDbConnection.prepareStatement(
-                "select * from mail_send_request order by mail_request_id");
-        ResultSet rs = statement.executeQuery();
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("101"));
-        assertThat(rs.getString("status"), is("B"));
-        assertThat(rs.getObject("sending_timestamp"), is(notNullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("102"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("103"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+        List<MailSendRequest> requests = VariousDbTestHelper.findAll(MailSendRequest.class, "mailRequestId");
+        assertThat("リクエスト数が一致すること", requests.size(), is(3));
+        verifyRequestStatus( requests.get(0), "101", "B", true);
+        verifyRequestStatus( requests.get(1), "102", "A", false);
+        verifyRequestStatus( requests.get(2), "103", "A", false);
     }
 
     /**
@@ -292,21 +286,11 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
             assertThat(smime.getFileName(), is("smime.p7s"));
         }
 
-        PreparedStatement statement = testDbConnection.prepareStatement(
-                "select * from mail_send_request order by mail_request_id");
-        ResultSet rs = statement.executeQuery();
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("101"));
-        assertThat(rs.getString("status"), is("B"));
-        assertThat(rs.getObject("sending_timestamp"), is(notNullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("102"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("103"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+        List<MailSendRequest> requests = VariousDbTestHelper.findAll(MailSendRequest.class, "mailRequestId");
+        assertThat("リクエスト数が一致すること", requests.size(), is(3));
+        verifyRequestStatus( requests.get(0), "101", "B", true);
+        verifyRequestStatus( requests.get(1), "102", "A", false);
+        verifyRequestStatus( requests.get(2), "103", "A", false);
     }
     /**
      * 添付ファイル複数有りパターンの電子署名確認。
@@ -405,21 +389,11 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
             assertThat(smime.getFileName(), is("smime.p7s"));
         }
 
-        PreparedStatement statement = testDbConnection.prepareStatement(
-                "select * from mail_send_request order by mail_request_id");
-        ResultSet rs = statement.executeQuery();
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("101"));
-        assertThat(rs.getString("status"), is("B"));
-        assertThat(rs.getObject("sending_timestamp"), is(notNullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("102"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("103"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+        List<MailSendRequest> requests = VariousDbTestHelper.findAll(MailSendRequest.class, "mailRequestId");
+        assertThat("リクエスト数が一致すること", requests.size(), is(3));
+        verifyRequestStatus( requests.get(0), "101", "B", true);
+        verifyRequestStatus( requests.get(1), "102", "A", false);
+        verifyRequestStatus( requests.get(2), "103", "A", false);
     }
 
     /**
@@ -460,24 +434,11 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
         assertLog("メール送信要求が 1 件あります。");
         assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 103");
 
-        PreparedStatement statement = testDbConnection.prepareStatement(
-                "select * from mail_send_request order by mail_request_id");
-        ResultSet rs = statement.executeQuery();
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("101"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("102"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        assertThat(rs.next(), is(true));
-        // 障害になったレコード
-        assertThat(rs.getString("mail_request_id"), is("103"));
-        assertThat(rs.getString("status"), is("Z"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        statement.close();
-
+        List<MailSendRequest> requests = VariousDbTestHelper.findAll(MailSendRequest.class, "mailRequestId");
+        assertThat("リクエスト数が一致すること", requests.size(), is(3));
+        verifyRequestStatus( requests.get(0), "101", "A", false);
+        verifyRequestStatus( requests.get(1), "102", "A", false);
+        verifyRequestStatus( requests.get(2), "103", "Z", false);
     }
 
     /**
@@ -523,17 +484,28 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
         assertLog("No certification setting. mailSendPatternId=[05]");
         assertLog("[199 ProcessAbnormalEnd] メール送信失敗：メールリクエストID 101");
 
-        PreparedStatement statement = testDbConnection.prepareStatement(
-                "select * from mail_send_request order by mail_request_id");
-        ResultSet rs = statement.executeQuery();
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("101"));
-        assertThat(rs.getString("status"), is("Z"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
-        assertThat(rs.next(), is(true));
-        assertThat(rs.getString("mail_request_id"), is("102"));
-        assertThat(rs.getString("status"), is("A"));
-        assertThat(rs.getObject("sending_timestamp"), is(nullValue()));
+        List<MailSendRequest> requests = VariousDbTestHelper.findAll(MailSendRequest.class, "mailRequestId");
+        assertThat("リクエスト数が一致すること", requests.size(), is(2));
+        verifyRequestStatus( requests.get(0), "101", "Z", false);
+        verifyRequestStatus( requests.get(1), "102", "A", false);
+    }
+
+    /**
+     * メール送信要求のステータスを検証する。
+     *
+     * @param request   メール送信要求
+     * @param requestId ID
+     * @param status    送信ステータス
+     * @param isNotNullSendTimestamp    送信日時がNotNullかどうか
+     */
+    private void verifyRequestStatus(final MailSendRequest request, final String requestId, final String status, final boolean isNotNullSendTimestamp) {
+        assertThat("リクエストID", request.mailRequestId, is(requestId));
+        assertThat("送信ステータス", request.status, is(status));
+        if(isNotNullSendTimestamp) {
+            assertThat("送信日時が登録済み", request.sendingTimestamp, notNullValue());
+        } else {
+            assertThat("送信日時が未登録", request.sendingTimestamp, nullValue());
+        }
     }
 }
 

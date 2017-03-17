@@ -28,7 +28,7 @@
   <component name="statusUpdateTransaction" class="nablarch.core.db.transaction.SimpleDbTransactionManager">
     <property name="dbTransactionName" value="statusUpdateTransaction" />
     <property name="connectionFactory" ref="connectionFactory" />
-    <property name="transactionFactory" ref="transactionFactory" />
+    <property name="transactionFactory" ref="jdbcTransactionFactory" />
   </component>
 
   <!-- ハンドラキュー構成 -->
@@ -77,7 +77,7 @@
     <!-- ループ・トランザクション制御ハンドラ -->
     <component class="nablarch.fw.handler.LoopHandler">
       <property name="commitInterval" value="${commitInterval}" />
-      <property name="transactionFactory" ref="transactionFactory" />
+      <property name="transactionFactory" ref="jdbcTransactionFactory" />
     </component>
 
     <!-- データリードハンドラ -->

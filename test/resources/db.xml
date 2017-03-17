@@ -5,36 +5,10 @@
     xsi:schemaLocation="http://tis.co.jp/nablarch/component-configuration">
 
   <!-- DB接続先情報 -->
-  <config-file file="classpath:db.config" />
+  <import file="db-default.xml" />
 
   <component name="dbManager" class="nablarch.core.db.transaction.SimpleDbTransactionManager">
     <property name="connectionFactory" ref="connectionFactory" />
-    <property name="transactionFactory" ref="transactionFactory" />
+    <property name="transactionFactory" ref="jdbcTransactionFactory" />
   </component>
-
-  <component name="connectionFactory" class="nablarch.core.db.connection.BasicDbConnectionFactoryForDataSource">
-    <property name="dialect">
-      <component class="nablarch.core.db.dialect.OracleDialect"/>
-    </property>
-    <property name="dataSource">
-      <component class="oracle.jdbc.pool.OracleDataSource">
-        <property name="user" value="${db.user}" />
-        <property name="password" value="${db.password}" />
-        <property name="URL" value="${db.url}" />
-      </component>
-    </property>
-    <property name="statementReuse" value="true" />
-    <property name="statementFactory">
-      <component class="nablarch.core.db.statement.BasicStatementFactory" autowireType="None">
-        <property name="sqlStatementExceptionFactory">
-          <component class="nablarch.core.db.statement.exception.BasicSqlStatementExceptionFactory" />
-        </property>
-      </component>
-    </property>
-  </component>
-
-  <component name="transactionFactory" class="nablarch.core.db.transaction.JdbcTransactionFactory">
-    <property name="isolationLevel" value="READ_COMMITTED" />
-  </component>
-
 </component-configuration>

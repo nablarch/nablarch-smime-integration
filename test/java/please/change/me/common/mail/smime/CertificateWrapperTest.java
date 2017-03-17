@@ -6,12 +6,12 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import nablarch.core.repository.SystemRepository;
-import static junit.framework.Assert.fail;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.fail;
 
 /**
  * {@link CertificateWrapper}のテストクラス。

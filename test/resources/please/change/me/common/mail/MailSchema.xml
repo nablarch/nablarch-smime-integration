@@ -29,7 +29,7 @@
     <property name="dbTransactionManager">
       <component class="nablarch.core.db.transaction.SimpleDbTransactionManager">
         <property name="connectionFactory" ref="connectionFactory" />
-        <property name="transactionFactory" ref="transactionFactory" />
+        <property name="transactionFactory" ref="jdbcTransactionFactory" />
         <property name="dbTransactionName" value="MailRequestIdGenerator" />
       </component>
     </property>
