@@ -29,16 +29,19 @@ import nablarch.common.mail.AttachedFile;
 import nablarch.common.mail.FreeTextMailContext;
 import nablarch.fw.launcher.CommandLine;
 import nablarch.fw.launcher.Main;
+import nablarch.test.support.db.helper.DatabaseTestRunner;
 import nablarch.test.support.db.helper.VariousDbTestHelper;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * {@link SMIMESignedMailSender}のテスト。
  *
  * @author hisaaki sioiri
  */
+@RunWith(DatabaseTestRunner.class)
 public class SMIMESignedMailSenderTest extends MailTestSupport {
 
     /** メールサーバへの接続プロパティ */

@@ -25,21 +25,18 @@ import nablarch.core.repository.di.ComponentDefinitionLoader;
 import nablarch.core.repository.di.DiContainer;
 import nablarch.core.repository.di.config.xml.XmlComponentDefinitionLoader;
 import nablarch.core.transaction.TransactionFactory;
-import nablarch.test.support.db.helper.DatabaseTestRunner;
 import nablarch.test.support.db.helper.VariousDbTestHelper;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
 
 /**
  * メール関連のテストをサポートするクラス。
  *
  * @author hisaaki sioiri
  */
-@RunWith(DatabaseTestRunner.class)
 public class MailTestSupport {
 
     @BeforeClass
