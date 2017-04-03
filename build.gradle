@@ -32,22 +32,6 @@ dependencyManagement {
   applyMavenExclusions false
 }
 
-sourceSets {
-  main {
-    java {
-      srcDir "${projectDir}/main/java"
-    }
-  }
-  test {
-    java {
-      srcDir "${projectDir}/test/java"
-    }
-    resources {
-      srcDir "${projectDir}/test/resources"
-    }
-  }
-}
-
 repositories {
   mavenLocal()
   maven { url "${developLibUrl}" }
@@ -74,14 +58,16 @@ dependencies {
   testRuntime 'com.nablarch.framework:nablarch-common-idgenerator-jdbc'
   testRuntime 'com.nablarch.framework:nablarch-common-jdbc'
 
-  // JDBC Drivers
-  testCompile (group: 'com.oracle', name: 'ojdbc6', version: '11.2.0.4.0')
-  testRuntime (group: 'com.oracle', name: 'ucp', version: '11.2.0.3.0')
-
   // mail
   testRuntime 'com.sun.mail:pop3:1.4.4'
   testRuntime 'com.sun.mail:smtp:1.4.4'
 
+}
+
+configurations {
+  all*.exclude module: 'nablarch-test-support-hereis'
+  all*.exclude module: 'jsp-api-2.1-glassfish'
+  all*.exclude module: 'jsp-2.1-glassfish'
 }
 
 test {
