@@ -23,7 +23,7 @@ public class MailRecipient {
     public String mailRequestId;
 
     @Id
-    @Column(name = "RECIPIENT_NO", nullable = false)
+    @Column(name = "RECIPIENT_NO", length=10, nullable = false)
     public Integer recipientNo;
 
     @Column(name = "RECIPIENT_TYPE", length = 3)

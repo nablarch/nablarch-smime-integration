@@ -21,16 +21,15 @@ import nablarch.core.db.connection.ConnectionFactory;
 import nablarch.core.db.transaction.SimpleDbTransactionExecutor;
 import nablarch.core.db.transaction.SimpleDbTransactionManager;
 import nablarch.core.repository.SystemRepository;
-import nablarch.core.repository.di.ComponentDefinitionLoader;
-import nablarch.core.repository.di.DiContainer;
-import nablarch.core.repository.di.config.xml.XmlComponentDefinitionLoader;
 import nablarch.core.transaction.TransactionFactory;
+import nablarch.test.support.SystemRepositoryResource;
 import nablarch.test.support.db.helper.VariousDbTestHelper;
+import nablarch.test.support.log.app.OnMemoryLogWriter;
 
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 
 /**
  * メール関連のテストをサポートするクラス。
@@ -39,12 +38,13 @@ import org.junit.BeforeClass;
  */
 public class MailTestSupport {
 
+    @ClassRule
+    public static final SystemRepositoryResource RESOURCE = new SystemRepositoryResource(
+      "please/change/me/common/mail/smime/SmimeSignedMailSenderTest.xml"
+    );
+
     @BeforeClass
     public static void setupClass() {
-        ComponentDefinitionLoader loader = new XmlComponentDefinitionLoader(
-                "please/change/me/common/mail/smime/SmimeSignedMailSenderTest.xml");
-        SystemRepository.load(new DiContainer(loader));
-
         // テーブルの作成
         VariousDbTestHelper.createTable(MailSendRequest.class);
         VariousDbTestHelper.createTable(MailRecipient.class);
@@ -104,10 +104,6 @@ public class MailTestSupport {
         for (Class clazz : classes) {
             VariousDbTestHelper.delete(clazz);
         }
-    }
-
-    @After
-    public void after() {
     }
 
     @AfterClass

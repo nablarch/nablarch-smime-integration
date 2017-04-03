@@ -24,6 +24,6 @@ public class IdGenerator {
     @Column(name = "ID", length = 2, nullable = false)
     public String id;
 
-    @Column(name = "GENERATED_VALUE", nullable = false)
+    @Column(name = "GENERATED_VALUE", length=10, nullable = false)
     public Integer generatedValue;
 }

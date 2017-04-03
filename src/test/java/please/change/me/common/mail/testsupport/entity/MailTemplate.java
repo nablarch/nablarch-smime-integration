@@ -35,7 +35,7 @@ public class MailTemplate {
     @Column(name = "LANG", length = 2, nullable = false)
     public String lang;
 
-    @Column(name = "SUBJECT", length = 10)
+    @Column(name = "SUBJECT", length = 20)
     public String subject;
 
     @Column(name = "BODY", length = 1000)

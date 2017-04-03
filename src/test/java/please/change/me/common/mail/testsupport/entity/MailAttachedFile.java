@@ -25,7 +25,7 @@ public class MailAttachedFile {
     public String mailRequestId;
 
     @Id
-    @Column(name = "ATTACHED_NO", nullable = false)
+    @Column(name = "ATTACHED_NO", length=10, nullable = false)
     public Integer attachedNo;
 
     @Column(name = "FILE_NAME", length = 100)

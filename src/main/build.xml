@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Nablarch Mail Extended implementation" default="compile" basedir=".">
+<project name="Nablarch Mail Extended implementation" default="compile" basedir="">
 
     <property file="build.properties" />
 
@@ -87,7 +87,7 @@
                  failOnError="yes">
             <link offline="true"
                   href="http://docs.oracle.com/javase/jp/6/api/"
-                  packagelistLoc="./" />
+                  packagelistLoc="/" />
             <doctitle>${javadoc.window.title}</doctitle>
             <classpath>
                 <path refid="lib.path" />

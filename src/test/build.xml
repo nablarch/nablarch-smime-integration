@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="nablarch_BC_test" default="test" basedir=".">
+<project name="nablarch_BC_test" default="test" basedir="">
 
     <property file="build.properties" />
 
@@ -39,7 +39,7 @@
         <delete dir="${junit.report.dir}" />
         <delete dir="${cobertura.report.dir}" />
         <delete>
-            <fileset dir="." includes="*.old" />
+            <fileset dir="" includes="*.old" />
         </delete>
     </target>
 

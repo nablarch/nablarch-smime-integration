@@ -212,7 +212,7 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
         mailContext.addCc("cc1@localhost");
         mailContext.addBcc("bcc1@localhost");
         mailContext.setMailSendPatternId("01");
-        mailContext.addAttachedFile(new AttachedFile("text/plain", new File("test/java/please/change/me/common/mail/smime/data/temp1.txt")));
+        mailContext.addAttachedFile(new AttachedFile("text/plain", new File("src/test/resources/please/change/me/common/mail/smime/data/temp1.txt")));
         mailRequest(mailContext);
         // 処理対象外
         mailContext.setMailSendPatternId("00");
@@ -310,8 +310,8 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
         mailContext.addCc("cc1@localhost");
         mailContext.addBcc("bcc1@localhost");
         mailContext.setMailSendPatternId("04");
-        mailContext.addAttachedFile(new AttachedFile("text/plain", new File("test/java/please/change/me/common/mail/smime/data/temp1.txt")));
-        mailContext.addAttachedFile(new AttachedFile("application/pdf", new File("test/java/please/change/me/common/mail/smime/data/temp1.pdf")));
+        mailContext.addAttachedFile(new AttachedFile("text/plain", new File("src/test/resources/please/change/me/common/mail/smime/data/temp1.txt")));
+        mailContext.addAttachedFile(new AttachedFile("application/pdf", new File("src/test/resources/please/change/me/common/mail/smime/data/temp1.pdf")));
         mailRequest(mailContext);
         // 処理対象外
         mailContext.setMailSendPatternId("00");
@@ -416,7 +416,7 @@ public class SMIMESignedMailSenderTest extends MailTestSupport {
         mailContext.addCc("cc1@localhost");
         mailContext.addBcc("bcc1@localhost");
         mailContext.setMailSendPatternId("01");
-        mailContext.addAttachedFile(new AttachedFile("", new File("test/java/please/change/me/common/mail/smime/data/temp1.txt")));
+        mailContext.addAttachedFile(new AttachedFile("", new File("src/test/resources/please/change/me/common/mail/smime/data/temp1.txt")));
         mailRequest(mailContext);
         // 処理対象外
         mailContext.setMailSendPatternId("00");
