@@ -27,7 +27,7 @@ apply plugin: "io.spring.dependency-management"
 
 dependencyManagement {
   imports {
-    mavenBom 'com.nablarch.profile:nablarch-bom:5u9'
+    mavenBom 'com.nablarch.profile:nablarch-bom:5u10'
   }
   applyMavenExclusions false
 }
@@ -75,5 +75,5 @@ test {
 }
 
 wrapper {
-  gradleVersion = '2.4'
+  gradleVersion = '2.13'
 }
