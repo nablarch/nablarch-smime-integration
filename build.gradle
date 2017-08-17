@@ -70,9 +70,6 @@ configurations {
   all*.exclude module: 'jsp-2.1-glassfish'
 }
 
-test {
-}
-
 wrapper {
   gradleVersion = '2.13'
 }
